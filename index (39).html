@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLearn - Interactive Coding Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #ffd166;
+            --danger: #ef476f;
+            --gray: #adb5bd;
+            --code-bg: #2b2d42;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%);
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: rgba(13, 27, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--light);
+        }
+        
+        .logo i {
+            color: var(--success);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--success);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--success);
+            transition: width 0.3s;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--success);
+            color: var(--success);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--success);
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+        
+        .platform {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            height: 70vh;
+        }
+        
+        @media (max-width: 992px) {
+            .platform {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+        
+        .editor-container, .preview-container {
+            background: rgba(27, 38, 59, 0.8);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .editor {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            flex: 1;
+            overflow: auto;
+            font-family: 'Fira Code', monospace;
+            line-height: 1.5;
+            tab-size: 2;
+            position: relative;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .code-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .code-actions i {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .code-actions i:hover {
+            color: var(--success);
+        }
+        
+        textarea.code-input {
+            width: 100%;
+            height: 85%;
+            background: transparent;
+            border: none;
+            color: #f8f8f2;
+            font-family: 'Fira Code', monospace;
+            resize: none;
+            outline: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .preview {
+            background: white;
+            border-radius: 8px;
+            flex: 1;
+            overflow: auto;
+            padding: 1rem;
+            color: var(--dark);
+        }
+        
+        .challenge-container {
+            background: rgba(27, 38, 59, 0.8);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .challenge-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .challenge-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--success);
+        }
+        
+        .challenge-description {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            height: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 65%;
+            background: var(--success);
+            border-radius: 50px;
+        }
+        
+        .hints-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .hints-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .hint {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--gray);
+        }
+        
+        .hint:before {
+            content: '💡';
+            position: absolute;
+            left: 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-run {
+            background: var(--success);
+            color: var(--dark);
+        }
+        
+        .btn-submit {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-hint {
+            background: transparent;
+            border: 2px solid var(--warning);
+            color: var(--warning);
+        }
+        
+        footer {
+            background: rgba(13, 27, 42, 0.8);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--success);
+        }
+        
+        .copyright {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .platform {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-code"></i>
+            <span>CodeLearn</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Courses</a></li>
+                <li><a href="#">Challenges</a></li>
+                <li><a href="#">Community</a></li>
+                <li><a href="#">Docs</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button class="btn btn-outline">Log In</button>
+            <button class="btn btn-primary">Sign Up</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="platform">
+            <div class="editor-container">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-pencil-alt"></i>
+                        Code Editor
+                    </div>
+                    <div class="language-selector">
+                        <select>
+                            <option>HTML</option>
+                            <option>CSS</option>
+                            <option>JavaScript</option>
+                            <option>Python</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="editor">
+                    <div class="code-header">
+                        <span>script.js</span>
+                        <div class="code-actions">
+                            <i class="fas fa-copy" title="Copy code"></i>
+                            <i class="fas fa-redo" title="Reset code"></i>
+                            <i class="fas fa-expand" title="Fullscreen"></i>
+                        </div>
+                    </div>
+                    <textarea class="code-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+// Welcome to CodeLearn!
+// Create a function that returns the sum of two numbers
+
+function sum(a, b) {
+    // Your code here
+}
+
+// Test your function
+console.log(sum(2, 3)); // Should output 5
+console.log(sum(5, 7)); // Should output 12
+                    </textarea>
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fas fa-play-circle"></i>
+                        Output
+                    </div>
+                    <div class="console-toggle">
+                        <button class="btn btn-outline">Console</button>
+                    </div>
+                </div>
+                <div class="preview">
+                    <h3>Code Output</h3>
+                    <div class="output-content">
+                        <p>Run your code to see the output here.</p>
+                        <div class="console-output">
+                            <div class="console-header">Console</div>
+                            <div class="console-content">
+                                > Code not executed yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-container">
+            <div class="challenge-header">
+                <h2 class="challenge-title">Challenge #1: Sum Function</h2>
+                <p class="challenge-description">Create a function called <code>sum</code> that takes two numbers as arguments and returns their sum.</p>
+                
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                
+                <div class="difficulty">
+                    <span>Difficulty: </span>
+                    <span class="difficulty-level">Beginner</span>
+                </div>
+            </div>
+            
+            <div class="hints-container">
+                <h3 class="hints-title"><i class="fas fa-lightbulb"></i> Hints</h3>
+                <div class="hint">Remember to use the + operator to add two numbers.</div>
+                <div class="hint">Make sure to return the result from your function.</div>
+                <div class="hint">Test your function with different inputs to ensure it works correctly.</div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-run"><i class="fas fa-play"></i> Run Code</button>
+                <button class="btn btn-submit"><i class="fas fa-check-circle"></i> Submit Solution</button>
+                <button class="btn btn-hint"><i class="fas fa-lightbulb"></i> Show Hint</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#">About Us</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Careers</a>
+                <a href="#">Contact</a>
+                <a href="#">Help Center</a>
+            </div>
+            <div class="copyright">
+                &copy; 2023 CodeLearn. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const runButton = document.querySelector('.btn-run');
+            const codeInput = document.querySelector('.code-input');
+            const consoleContent = document.querySelector('.console-content');
+            
+            runButton.addEventListener('click', function() {
+                const code = codeInput.value;
+                
+                // Capture console.log outputs
+                const originalConsoleLog = console.log;
+                let consoleOutput = '';
+                
+                console.log = function(message) {
+                    consoleOutput += '> ' + message + '\n';
+                };
+                
+                try {
+                    // Execute the code
+                    eval(code);
+                    consoleContent.textContent = consoleOutput || '> Code executed successfully (no output)';
+                } catch (error) {
+                    consoleContent.textContent = '> Error: ' + error.message;
+                }
+                
+                // Restore console.log
+                console.log = originalConsoleLog;
+            });
+            
+            // Add interactive features to buttons
+            const hintButton = document.querySelector('.btn-hint');
+            const hintsContainer = document.querySelector('.hints-container');
+            
+            hintButton.addEventListener('click', function() {
+                hintsContainer.style.display = hintsContainer.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // Copy code functionality
+            const copyButton = document.querySelector('.fa-copy');
+            copyButton.addEventListener('click', function() {
+                codeInput.select();
+                document.execCommand('copy');
+                
+                // Show copied feedback
+                const originalTitle = copyButton.title;
+                copyButton.title = 'Copied!';
+                setTimeout(() => {
+                    copyButton.title = originalTitle;
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
